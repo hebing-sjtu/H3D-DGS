@@ -1,13 +1,34 @@
 # H3D-DGS: Exploring Heterogeneous 3D Motion Representation for Deformable 3D Gaussian Splatting
-![image](assets/teaser.png)
 
-## H3D Control Points
+<div align="center">
+<a href="https://openreview.net/forum?id=6VoDizmIoY"><img src='https://img.shields.io/badge/arXiv-2408.13036-b31b1b.svg'></a> &nbsp;
+<a href="https://hebing-sjtu.github.io/H3D-DGS-page/"><img src='https://img.shields.io/badge/Project-In%20Progress-brightgreen.svg'></a> &nbsp;
+
+_**[Bing He<sup>*;</sup>](https://github.com/hebing-sjtu), 
+Yunuo Chen<sup>*</sup>, 
+Guo Lu, 
+Xie Rong,
+Li Song <sup>&dagger;</sup>, 
+Wenjun Zhang**_
+<br><br>
+Shanghai Jiao Tong University
+
+
+<h2 align="center">🌟 <b>NeurIPS 2025</b> 🌟</h2>
+
+</div>
+
+
+![image](assets/teaser.png)
+## 🔆 Introduction
+
+### H3D Control Points
 
 Brand-new motion discrete representation tailored for neural volume rendering. Marry neural representation with traditional graphics. H3D Control Points inherit 3D motion from 2D optical prior, thus effective constraint and fast convergence. No fear for complex motion.
 
 ![image](assets/H3D.png)
 
-## Streaming Pipeline
+### Streaming Pipeline
 
 A straightforward but effective workflow enable **streaming** dynamic 3D reconstruction utilizing H3D points and 3D Gaussians. 
 
@@ -15,7 +36,7 @@ A straightforward but effective workflow enable **streaming** dynamic 3D reconst
 
 
 
-## Installation
+## 🧰 Installation
 
 assume that you have already installed nvcc version>=12.1,
 or else you should follow the offical document to install CUDA driver as well as Nvidia toolkit.
@@ -62,7 +83,7 @@ pip install .
 cd ../..
 ```
 
-## Data preparation
+## 📁 Data preparation
 ```python
 datasets
     |
@@ -105,3 +126,17 @@ datasets
 
 ```
 
+
+
+
+## 📜 Citation
+
+If you find our work useful, please consider citing:
+
+```
+@inproceedings{heh3d,
+  title={H3D-DGS: Exploring Heterogeneous 3D Motion Representation for Deformable 3D Gaussian Splatting},
+  author={He, Bing and Chen, Yunuo and Lu, Guo and Wang, Qi and Gu, Qunshan and Xie, Rong and Song, Li and Zhang, Wenjun},
+  booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems}
+}
+```
