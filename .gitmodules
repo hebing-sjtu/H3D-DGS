@@ -1,0 +1,9 @@
+[submodule "submodules/rasterization"]
+	path = submodules/rasterization
+	url = git@github.com:hebing-sjtu/diff-gaussian-rasterization-w-depth.git
+[submodule "submodules/KMeans"]
+	path = submodules/KMeans
+	url = git@github.com:hebing-sjtu/fast_pytorch_kmeans.git
+[submodule "submodules/KNN"]
+	path = submodules/KNN
+	url = git@github.com:hebing-sjtu/KNN_CUDA.git

@@ -1,0 +1,7 @@
+matplotlib
+open3d==0.16.0
+pytorch-msssim
+opencv-python
+plyfile
+einops
+opencv-contrib-python==4.6.0.66
