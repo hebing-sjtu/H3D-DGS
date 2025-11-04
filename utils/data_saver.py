@@ -82,3 +82,4 @@ def save_res_params(output_params:dict, exp: str, seq: str, t: int):
 
     os.makedirs(f"./output/{exp}/{seq}/res_params", exist_ok=True)
     np.savez(f"./output/{exp}/{seq}/res_params/{t}", **output_params)
+

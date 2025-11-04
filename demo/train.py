@@ -1,4 +1,7 @@
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import argparse
 import torch
@@ -8,12 +11,11 @@ from time import time
 from utils.data_preprocess import get_common_param, get_dataset, get_batch
 from utils.data_reader import load_ply, get_flow
 from utils.data_saver import save_res_params, save_render_ply, save_gs_cate, save_ctrl_idx
-from utils.format_converter import params2cpu, vars2cpu
+from utils.format_converter import params2cpu, vars2cpu, render_one_frame_in_train
 from utils.gs_optimizer import initialize_params, initialize_optimizer, initialize_post_timestep, \
     residual_init_per_timestep, residual_init_opt, update_learning_rate, report_progress, densify, get_loss, get_expon_lr_func
 from utils.gs_classifier import gs_cate
 from utils.CTRL_pts import ctrlvar_generator, ctrl_select, ctrl_prune, get_id_wgt, volume_warping
-from demo.render import render_one_frame_in_train
 
 
 def train(dataset_dir:str, seq:str, exp:str, cuda_id:int=0, ds_ratio:int=2, 

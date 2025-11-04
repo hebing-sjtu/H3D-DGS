@@ -5,7 +5,7 @@ import glob
 import pickle
 from plyfile import PlyData
 from utils.format_converter import SH2RGB
-from data_preprocess import Common_Param
+from utils.data_preprocess import Common_Param
 
 
 def load_ply(common_param: Common_Param, exp: str, seq: str, frame_id: int = None)->tuple:
@@ -146,7 +146,8 @@ def get_flow(dataset_dir: str, seq: str, radius: float)->dict:
     """
     
     # path = f"{dataset_dir}/{seq}/flows/result_dict_model_DIS_radius_{radius}.pkl"
-    path = f"{dataset_dir}/{seq}/flows/result_dict_model_DIS_grid-size32_small-range-True-0_avg-motion-True_random-shift-True_big-mask-abl2-unb.pkl"
+    path = f"{dataset_dir}/{seq}/flows/model_DIS_radius_8.pkl"
+    # path = f"{dataset_dir}/{seq}/flows/result_dict_model_DIS_grid-size32_small-range-True-0_avg-motion-True_random-shift-True_big-mask-abl2-unb.pkl"
     # path = f"./flows/result_dict_model_spy_frameNum_300_viewNum_21_clusterNum_0_grid-size32_jump-step2_small-range-True-16_avg-motion-True.pkl"
     with open(path, 'rb') as f:
         flowsss = pickle.load(f)

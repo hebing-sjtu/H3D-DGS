@@ -5,7 +5,6 @@ import json
 import glob
 import copy
 import torch.nn.functional as F
-import open3d as o3d
 
 from PIL import Image
 from random import randint
@@ -59,6 +58,7 @@ class Common_Param(NamedTuple):
     obj_num: int
     cam_num: int
     cams: list
+    cam_list: list
     dataset_train_cam_id: list
     dataset_test_cam_id: list
     dataset_edge_cam_id: list
@@ -114,7 +114,7 @@ def get_common_param(dataset_dir:str, seq:str,
     edge_cam_id = []
     mask_id = []
     flow_id = []
-    side_padding = torch.zeros(3,1).float()
+    side_padding = torch.zeros(3,1, dtype=torch.float32)
     bottom_tensor = torch.tensor([[0, 0, 0, 1]], dtype=torch.float32)
     bottom = np.array([[0, 0, 0, 1]], dtype=np.float32)
     
@@ -181,8 +181,8 @@ def get_common_param(dataset_dir:str, seq:str,
             else:
                 cam_id = test_cam_id.index(c)
                 k, w2c = md_test['k'][0][cam_id], md_test['w2c'][0][cam_id]
-            k = torch.tensor(k)/ds_ratio
-            w2c = torch.tensor(w2c)
+            k = torch.tensor(k,dtype=torch.float32)/ds_ratio
+            w2c = torch.tensor(w2c,dtype=torch.float32)
             c2w = torch.inverse(w2c)
             cam_center = c2w[:3, 3]
             cam = setup_camera(W, H, k, w2c, cam_center, near=1.0, far=100)
@@ -192,9 +192,9 @@ def get_common_param(dataset_dir:str, seq:str,
             R = -R
             R[:,0] = -R[:,0]
             T = -pose[:3,3].dot(R)
-            k = torch.tensor([[focal, 0.0, W / 2.0], [0, focal, H / 2.0], [0.0, 0.0, 1.0]])
+            k = torch.tensor([[focal, 0.0, W / 2.0], [0, focal, H / 2.0], [0.0, 0.0, 1.0]], dtype=torch.float32)
             w2c = np.concatenate([np.concatenate([R.T, T[..., None]], -1), bottom], 0)
-            w2c = torch.tensor(w2c)
+            w2c = torch.tensor(w2c,dtype=torch.float32)
             c2w = torch.inverse(w2c)
             cam_center = c2w[:3, 3]
             cam = setup_camera_v2(W, H, focal, w2c, cam_center)
@@ -440,39 +440,6 @@ def setup_camera_v2(W: int, H: int, focal: float,
         # debug=False,
     )
     return cam
-
-
-def o3d_knn(q_pts: np.ndarray, t_pts: np.ndarray, 
-            num_knn: int, min_contained: bool) -> Tuple[np.ndarray, np.ndarray]:
-    """Find the k-nearest neighbors using Open3D. used for gs initialization, 
-
-    Args:
-        q_pts (np.ndarray): Query points.
-        t_pts (np.ndarray): Target points.
-        num_knn (int): Number of nearest neighbors.
-        min_contained (bool): Whether to use only points contained in the target point cloud.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray]: The squared distances and indices of the nearest neighbors,
-        consistent with process in 4DGS.
-    """
-    
-    indices = []
-    sq_dists = []
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(np.ascontiguousarray(t_pts, np.float64))
-    pcd_tree = o3d.geometry.KDTreeFlann(pcd)
-    if not min_contained:
-        for p in q_pts:
-            [_, i, d] = pcd_tree.search_knn_vector_3d(p, num_knn + 1)
-            indices.append(i[1:])
-            sq_dists.append(d[1:])
-    else:
-        for p in q_pts:
-            [_, i, d] = pcd_tree.search_knn_vector_3d(p, num_knn)
-            indices.append(i)
-            sq_dists.append(d)
-    return np.array(sq_dists), np.array(indices)
 
 
 def select_cams(campos:torch.Tensor, train_cam_id:int, num_points:int)->list:

@@ -1,5 +1,7 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import argparse
 import torch
 import matplotlib.pyplot as plt
@@ -58,29 +60,6 @@ def render_one_frame(dataset_dir, seq, exp, output_dir, cuda_id=0, ds_ratio=2, t
         plt.imsave(f"{output_dir}/{str(t).zfill(4)}.png", im)
         # plt.imsave(f"{output_dir}/{str(t).zfill(4)}_depth.png", depth, cmap='gray')
 
-
-def render_one_frame_in_train(common_param, params, output_dir, t=0):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    cams = common_param.cams
-    flow_id = common_param.flow_id
-    cam_list = common_param.cam_list
-    depths_for_H3D = []
-    with torch.no_grad():
-        rendervar = params2rendervar(params)
-        for i, cam in enumerate(cams):
-            cam_name=cam_list[i]
-            im, _, depth, = Renderer(raster_settings=cam)(**rendervar)
-            if i in flow_id:
-                depths_for_H3D.append(depth.detach().squeeze())
-            img_outpath = f'{output_dir}/{str(cam_name)}/img'
-            os.makedirs(img_outpath, exist_ok=True)
-            im = im.cpu().numpy()
-            im = np.transpose(im, (1, 2, 0))
-            im = np.clip(im, 0, 1)
-            # print(im.max())
-            plt.imsave(f"{img_outpath}/{str(t).zfill(4)}.png", im)
-    return depths_for_H3D
 
 
 res_update_freq = 5

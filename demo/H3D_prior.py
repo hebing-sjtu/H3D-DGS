@@ -1,4 +1,7 @@
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import argparse
 import cv2
 import numpy as np
@@ -120,10 +123,10 @@ def process_frame(args, frame_id, gpu_id):
     torch.cuda.set_device(gpu_id)
     common_param = args.common_param
     train_idxs = common_param.train_cam_id
-    train_cam_num = len(train_idxs)
+    total_cam_num = common_param.cam_num
     dataset_train_cam_id = common_param.dataset_train_cam_id
     ks = common_param.k
-    camera_view_param_list = [None] * train_cam_num
+    camera_view_param_list = [None] * total_cam_num
     
     for train_idx in train_idxs:
         k = ks[train_idx]
@@ -170,15 +173,37 @@ def process_frame(args, frame_id, gpu_id):
                 view_result.append(None); continue      
             
             if args.flow_type == "Farneback":
-                flow = cv2.calcOpticalFlowFarneback(gray2, gray1, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+                # flow = cv2.calcOpticalFlowFarneback(gray2, gray1, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+                gpu_frame1 = cv2.cuda_GpuMat()
+                gpu_frame2 = cv2.cuda_GpuMat()
+                gpu_frame1.upload(gray2)
+                gpu_frame2.upload(gray1)
+                optflow = cv2.cuda_FarnebackOpticalFlow.create(
+                    numLevels=5,
+                    pyrScale=0.5,
+                    fastPyramids=False,
+                    winSize=15,
+                    numIters=3,
+                    polyN=5,
+                    polySigma=1.1,
+                    flags=0
+                )
+                flow_gpu = optflow.calc(gpu_frame1, gpu_frame2, None)
+                flow = flow_gpu.download()
             elif args.flow_type == "DeepFlow":
                 dis = cv2.optflow.createOptFlow_DeepFlow()
                 flow = dis.calc(gray2, gray1, None, )
             elif args.flow_type == "FB":
                 flow = cv2.optflow.calcOpticalFlowSparseToDense(gray2, gray1, None)
             elif args.flow_type == "TBL":
-                optical_flow = cv2.optflow.DualTVL1OpticalFlow_create()
-                flow = optical_flow.calc(gray2, gray1, None)
+                gpu_frame1 = cv2.cuda_GpuMat()
+                gpu_frame2 = cv2.cuda_GpuMat()
+                gpu_frame1.upload(gray2)
+                gpu_frame2.upload(gray1)
+                optical_flow = cv2.cuda_OpticalFlowDual_TVL1.create()
+                flow_gpu = optical_flow.calc(gpu_frame1, gpu_frame2, None)
+                flow = flow_gpu.download()
+                
             elif args.flow_type == "DIS":
                 optical_flow = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
                 flow = optical_flow.calc(gray2, gray1, None)
@@ -261,6 +286,8 @@ def process_frame(args, frame_id, gpu_id):
                 if theta.numel() > 0:
                     theta_mean = torch.nanmean(theta)
                     angles.append(theta_mean.item())
+                else:
+                    angles.append(0.0)
 
                 # print(flow_vectors.shape)
                 flow_mean = torch.mean(flow_vectors[valid_mask], dim=0)
@@ -268,8 +295,6 @@ def process_frame(args, frame_id, gpu_id):
                 real_positions.append((y.item(), x.item()))
 
             if len(real_positions) > 0:
-                if len(real_positions) == 1 and len(angles) == 0:
-                    angles = [0]
                 real_positions = np.array(real_positions)
                 real_position_flows = np.array(real_position_flows)
                 angles = np.array(angles).reshape(-1, 1)
@@ -298,12 +323,12 @@ def demo(args):
     num_gpus = torch.cuda.device_count()
     time_result = {}
 
-    # 将帧平均分配到不同GPU
+    # assign frames to different GPUs
     gpu_assignments = {gpu_id: [] for gpu_id in range(num_gpus)}
     for i, fid in enumerate(frame_ids):
         gpu_assignments[i % num_gpus].append(fid)
 
-    # 使用 torch.multiprocessing.Pool
+    # use torch.multiprocessing.Pool
     ctx = mp.get_context("spawn")
     with ctx.Pool(processes=num_gpus) as pool:
         jobs = []
@@ -321,7 +346,6 @@ def demo(args):
 
 
 if __name__ == '__main__':
-    # RAFT 的配置
     parser = argparse.ArgumentParser()
     parser.add_argument('--radius', type=int, default=8, help="optical flow radius")
     
@@ -339,7 +363,7 @@ if __name__ == '__main__':
     ############################################################################### 
 
     args.object_num = 3  # 
-    args.dataset_dir = 'datasets/Neural3D/sear_steak'
+    args.dataset_dir = 'datasets/Neural3D'
     seq_list = ["sear_steak"]
 
     for seq in seq_list:

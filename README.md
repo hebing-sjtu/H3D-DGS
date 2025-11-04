@@ -57,7 +57,7 @@ Then install the dependence of this repo
 # Install this repo
 conda create -n h3d-dgs python=3.10 -y
 conda activate h3d-dgs
-conda install pytorch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 pytorch-cuda=12.1 -c pytorch -c nvidia -y
+pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
 

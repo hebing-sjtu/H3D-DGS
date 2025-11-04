@@ -9,8 +9,8 @@
 # CMU_seq_list=('basketball' 'softball' 'boxes')
 Neural_seq_list=('sear_steak')
 CMU_seq_list=()
-DATASET_NEURAL="/data/ssd/4Ddatasets/Neural3D"
-DATASET_CMU="/data/ssd/4Ddatasets/CMU-Panoptic"
+DATASET_NEURAL="/root/H3D-DGS/datasets/Neural3D"
+DATASET_CMU="/root/H3D-DGS/datasets/CMU-Panoptic"
 
 # ===============================
 # Detect available GPUs
@@ -57,6 +57,7 @@ for cmd in "${all_seqs[@]}"; do
 done
 wait
 echo "✅ Training finished."
+exit 0
 
 # ===============================
 # 2️⃣ Rendering phase

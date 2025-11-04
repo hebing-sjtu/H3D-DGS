@@ -1,8 +1,10 @@
 import os
 import torch
 import numpy as np
+
+from pykdtree.kdtree import KDTree
 from plyfile import PlyData
-from utils.data_preprocess import Common_Param, o3d_knn, get_batch
+from utils.data_preprocess import Common_Param, get_batch
 from utils.rotation import build_quaternion_from_euler, quat_mult, rotate_vector
 from utils.format_converter import params2rendervar
 from utils.CTRL_pts import volume_warping
@@ -37,8 +39,10 @@ def initialize_params(common_param:Common_Param):
     pts_num = positions.shape[0]
 
     print("initial point num: ", pts_num)
-    sq_dist, _ = o3d_knn(positions, positions, 3, min_contained=False)
-    mean3_sq_dist = sq_dist.mean(-1).clip(min=0.0000001)
+    tree = KDTree(positions) 
+    sq_dist, _ = tree.query(positions, k=4)
+    sq_dist = sq_dist[:, 1:]
+    mean3_sq_dist = sq_dist.mean(-1).clip(min=0.0000001).clip(max=0.05)
     params = {
         'means3D': positions,
         'rgb_colors': colors,
@@ -300,6 +304,14 @@ def get_loss(params:dict, curr_data:dict, variables:dict, is_initial_timestep:bo
     else:
         render_params = volume_warping(common_param,variables,params,only_ctrl=only_ctrl,only_objs=only_objs,transfromrot=transfromrot)
         rendervar = params2rendervar(render_params)
+    print(rendervar)
+    print(rendervar['means3D'].shape)
+    print(rendervar['colors_precomp'].shape)
+    print(rendervar['rotations'].shape)
+    print(rendervar['scales'].shape, rendervar['scales'].max(), rendervar['scales'].min())
+    print(rendervar['opacities'].shape)
+    print(rendervar['means2D'].shape)
+    print(curr_data['cam'])
     rendervar['means2D'].retain_grad()
     im, _, depth, = Renderer(raster_settings=curr_data['cam'])(**rendervar)
     losses['im'] = 0.8 * l1_loss_v1(im, curr_data['im']) + 0.2 * (1.0 - calc_ssim(im, curr_data['im']))
