@@ -137,7 +137,7 @@ def load_res(common_param:Common_Param, exp: str, seq: str, frame_id: int = None
     return t_index, variables
 
 
-def get_flow(dataset_dir: str, seq: str, radius: float)->dict:
+def get_flow(dataset_dir: str, seq: str, radius: int)->dict:
 
     """Load preprocessedoptical flow data from a pickle file.
 

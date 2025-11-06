@@ -194,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--iter1', type=int, default=500, help='Iteration 1')
     parser.add_argument('--iter2', type=int, default=100, help='Iteration 2')
     parser.add_argument('--prune_ratio', type=float, default=0.1, help='Prune ratio')
-    parser.add_argument('--flow_radius', type=int, default=8, help='Prune ratio')
+    parser.add_argument('--flow_radius', type=int, default=2, help='Prune ratio')
     
     parser.add_argument('--prune', action='store_true', default=False, help='Prune')
     parser.add_argument('--transfromrot', action='store_true', default=False, help='Macro rotation')
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     # exp_name = f'GOS_{args.res_update_freq}_{args.iter1}iter1_{args.iter2}iter2_ctrl_prune_{args.prune}_{args.prune_ratio}'
     # exp_name = f'flowview_20_resper_{args.res_update_freq}_FPstride_32_16_{args.iter1}iter1_{args.iter2}iter2_ctrlselect_woc_prune03'
     train(args.dataset_dir, args.sequence, exp_name, args.cuda_id, args.ds_ratio, args.gc_knn_num, args.cc_knn_num, 
-            checkpoint=args.ckpt, res_update_freq=args.res_update_freq, prune=args.prune, prune_ratio=args.prune_ratio,
+            checkpoint=args.ckpt, res_update_freq=args.res_update_freq, prune=args.prune, prune_ratio=args.prune_ratio, radius=args.flow_radius,
             iter0=args.iter0, iter1=args.iter1, iter2=args.iter2, is_sport=args.is_sport, only_objs=args.only_objs, 
             transfromrot=args.transfromrot, depth_flag=args.depth_flag)
     torch.cuda.empty_cache()
