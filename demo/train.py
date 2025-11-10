@@ -162,7 +162,7 @@ def train(dataset_dir:str, seq:str, exp:str, cuda_id:int=0, ds_ratio:int=2,
         ### render current timestep
         if not no_render:
             output_dir = f'./output/{exp}/{seq}/render_result'
-            depths_for_H3D = render_one_frame_in_train(common_param, render_params, output_dir, t=t)
+            depths_for_H3D = render_one_frame_in_train(common_param, variables, output_dir, t=t)
         else:
             depths_for_H3D = None
         

@@ -68,7 +68,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from diff_gaussian_rasterization import GaussianRasterizer as Renderer
 
-def render_one_frame_in_train(common_param, params, output_dir, t=0):
+def render_one_frame_in_train(common_param, variables, output_dir, t=0):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     cams = common_param.cams
@@ -76,7 +76,7 @@ def render_one_frame_in_train(common_param, params, output_dir, t=0):
     cam_list = common_param.cam_list
     depths_for_H3D = []
     with torch.no_grad():
-        rendervar = params2rendervar(params)
+        rendervar = variables2rendervar(variables)
         for i, cam in enumerate(cams):
             cam_name=cam_list[i]
             im, _, depth, = Renderer(raster_settings=cam)(**rendervar)
